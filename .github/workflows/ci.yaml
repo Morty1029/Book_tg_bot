@@ -11,7 +11,7 @@ on:
       - main
 
 jobs:
-  setup:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

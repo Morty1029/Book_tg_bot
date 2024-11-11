@@ -8,7 +8,7 @@ load_dotenv()
 
 @pytest.fixture
 def bot_token() -> str:
-    return os.getenv("tg_token")
+    return os.getenv("TG_TOKEN")
 
 
 def test_bot_connection(bot_token) -> None:
