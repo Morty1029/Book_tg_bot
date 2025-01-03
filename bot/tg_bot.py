@@ -11,7 +11,6 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.context import FSMContext
 
 
-
 CONFIG = Config()
 DISPATCHER = Dispatcher()
 BOT = Bot(token=CONFIG.tg_token)
@@ -32,7 +31,7 @@ menu_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="📖 Задать вопрос по книге")],
     ],
-    resize_keyboard=True
+    resize_keyboard=True,
 )
 
 # Кнопки с выбором книг
@@ -46,7 +45,7 @@ books_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(text="Гарри Поттер и Принц Полукровка")],
         [KeyboardButton(text="Гарри Поттер и Дары смерти")],
     ],
-    resize_keyboard=True
+    resize_keyboard=True,
 )
 
 
@@ -54,8 +53,9 @@ books_keyboard = ReplyKeyboardMarkup(
 async def start(message: types.Message):
     await message.answer(
         text="Привет! Я - бот, который в любой момент может подсказать содержание одной из книг, о которых я знаю",
-        reply_markup=menu_keyboard
+        reply_markup=menu_keyboard,
     )
+
 
 """
 @DISPATCHER.message()
@@ -63,14 +63,15 @@ async def echo(message: types.Message):
     await message.answer(f'Вы написали: {message.text}')
 """
 
+
 @DISPATCHER.message(F.text == "📖 Задать вопрос по книге")
-async def ask_series(message: types.Message,  state: FSMContext):
+async def ask_series(message: types.Message, state: FSMContext):
     await message.answer(
         text="По какой из книг ты хотел бы задать свой вопрос?",
-        reply_markup=books_keyboard
+        reply_markup=books_keyboard,
     )
     await state.set_state(BookStates.series)
-    await state.update_data(series='GP')
+    await state.update_data(series="GP")
 
 
 @DISPATCHER.message(F.text, BookStates.series)
@@ -81,25 +82,25 @@ async def ask_book(message: types.Message, state: FSMContext):
         text=f"Я буду рад ответить на любой твой вопрос по книге {message.text}"
     )
 
+
 @DISPATCHER.message(F.text, BookStates.book_name)
 async def answer_book_question(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    book_num = books[data.get('book_name')]
+    book_num = books[data.get("book_name")]
     answer = await get_answer(message.text, book_num=book_num)
-    await message.answer(
-        text=f"{answer}"
-    )
-
+    await message.answer(text=f"{answer}")
 
 
 async def get_answer(prompt, book_num=None):
-    response = requests.get(f'{CONFIG.host}:{CONFIG.port}/get_answer', params={'prompt': prompt, 'book_num': book_num})
-    return response.json()['answer']
+    response = requests.get(
+        f"{CONFIG.host}:{CONFIG.port}/get_answer",
+        params={"prompt": prompt, "book_num": book_num},
+    )
+    return response.json()["answer"]
+
 
 async def main():
     await DISPATCHER.start_polling(BOT)
-
-
 
 
 if __name__ == "__main__":
