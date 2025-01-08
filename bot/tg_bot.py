@@ -10,7 +10,6 @@ from aiogram.filters.command import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.context import FSMContext
 
-
 CONFIG = Config()
 DISPATCHER = Dispatcher()
 BOT = Bot(token=CONFIG.tg_token)
@@ -37,13 +36,22 @@ menu_keyboard = ReplyKeyboardMarkup(
 # Кнопки с выбором книг
 books_keyboard = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="Гарри Поттер и Философский камень")],
-        [KeyboardButton(text="Гарри Поттер и Тайная комната")],
-        [KeyboardButton(text="Гарри Поттер и Узник Азкабана")],
-        [KeyboardButton(text="Гарри Поттер и Кубок огня")],
-        [KeyboardButton(text="Гарри Поттер и Орден Феникса")],
-        [KeyboardButton(text="Гарри Поттер и Принц Полукровка")],
-        [KeyboardButton(text="Гарри Поттер и Дары смерти")],
+        [
+            KeyboardButton(text="По всей саге"),
+            KeyboardButton(text="Гарри Поттер и Философский камень"),
+        ],
+        [
+            KeyboardButton(text="Гарри Поттер и Тайная комната"),
+            KeyboardButton(text="Гарри Поттер и Узник Азкабана"),
+        ],
+        [
+            KeyboardButton(text="Гарри Поттер и Кубок огня"),
+            KeyboardButton(text="Гарри Поттер и Орден Феникса"),
+        ],
+        [
+            KeyboardButton(text="Гарри Поттер и Принц Полукровка"),
+            KeyboardButton(text="Гарри Поттер и Дары смерти"),
+        ],
     ],
     resize_keyboard=True,
 )
@@ -86,9 +94,12 @@ async def ask_book(message: types.Message, state: FSMContext):
 @DISPATCHER.message(F.text, BookStates.book_name)
 async def answer_book_question(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    book_num = books[data.get("book_name")]
+    try:
+        book_num = books[data.get("book_name")]
+    except KeyError:
+        book_num = 0
     answer = await get_answer(message.text, book_num=book_num)
-    await message.answer(text=f"{answer}")
+    await message.answer(text=f"{answer}", reply_markup=menu_keyboard)
 
 
 async def get_answer(prompt, book_num=None):
